@@ -6,11 +6,23 @@ This script allows you to DCA on Ethereum (on-chain) by swapping a fixed amount 
 
 Use CRON to run this script at regular intervals.
 
+## Features
+📈 Quote the swap price using [Uniswap V3 Quoter](https://docs.uniswap.org/contracts/v3/reference/periphery/lens/Quoter)   
+👛 Encrypt your mnemonic using [ChaCha20Poly1305](https://docs.rs/orion/latest/orion/aead/index.html)
+
 ## Installation
-TODO
+💭 A later Installation guide for non-rust users will be added when the CI/CD pipeline is set up
+
+For now, you can clone the repo and run the script using cargo
+```sh
+git clone git@github.com:azerpas/dca-ethereum-onchain.git
+cd dca-ethereum-onchain
+cargo run -- -h
+```
+
+[Example of running the script](#example)
 
 ## Usage
-TODO
 ```
 Usage: dca-onchain [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
 
@@ -34,3 +46,16 @@ Options:
   -V, --version
           Print version
 ```
+
+### Example
+Swap 1 UNI for some WETH on Goerli
+```sh
+cargo run -- -u "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" -n 5 -d true -a 1 -s 1 -i "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" -o "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" 
+```
+- `-u` is the RPC endpoint to connect to. You can get an API key from an RPC provider like [Alchemy](https://www.alchemy.com/)
+- `-n` is the chain ID of the network to connect to. 5 is for Goerli
+- `-d` is used to fetch the decimals of the token you want to swap from. If used, the given `amount_to_swap` and `amount_to_approve` will be multiplied by 10^`decimals` to get the correct amount. `decimals` are fetched from the token contract. For example, if you want to swap 0.5 USDT, you need to specify 500000 (USDT having 6 decimals) without the `-d` flag. With the `-d` flag, you can specify 0.5 and the script will fetch the decimals from the USDT contract and multiply 0.5 by 10^6 to get the correct amount.
+- `-a` is the amount of tokens to approve for the swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
+- `-s` is the amount of tokens to swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
+- `-i` is the address of the token to swap from. This is the token you want to sell. It must be a valid ERC20 token address, here it's UNI on Goerli
+- `-o` is the address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address, here it's WETH on Goerli 
