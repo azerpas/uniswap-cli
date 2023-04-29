@@ -103,3 +103,18 @@ pub fn decrypt(ciphertext: impl AsRef<[u8]>, password: impl AsRef<str>) -> Resul
     let key = get_key_from_password(password, &ciphertext[..XCHACHA_NONCESIZE])?;
     open(&key, ciphertext).with_context(|| "Ciphertext was tampered with")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_encrypt_decrypt() {
+        let plaintext = "Hello world!";
+        let password = "password";
+        let nonce = nonce().unwrap();
+        let ciphertext = encrypt(plaintext, password, &nonce).unwrap();
+        let decrypted = decrypt(&ciphertext, password).unwrap();
+        assert_eq!(plaintext.as_bytes(), decrypted.as_slice());
+    }
+}

@@ -12,6 +12,10 @@ use ethers::{
     signers::{coins_bip39::English, MnemonicBuilder, Wallet},
 };
 
+/// Ask the user for a password to encrypt/decrypt the mnemonic
+/// 
+/// ## Returns
+/// The password as a string
 fn get_password() -> Result<String> {
     let password =
         rpassword::prompt_password("Your password: ").context("Failed to read password")?;
@@ -19,6 +23,11 @@ fn get_password() -> Result<String> {
     Ok(password.trim().to_string())
 }
 
+/// Get the mnemonic from the encrypted file and decrypt it with the password
+/// given by the user
+/// 
+/// ## Returns
+/// The Wallet ready to be used by ethers-rs
 pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
     let mut path = get_path_to_directory();
     path = path.join("mnemonic.enc");
@@ -40,6 +49,12 @@ pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
     Ok(wallet)
 }
 
+/// Ask the user for a mnemonic/seed phrase/recovery phrase/... 
+/// 
+/// More informations here: https://www.ledger.com/academy/glossary/seed-phrase
+/// 
+/// ## Returns
+/// The mnemonic as a string
 fn ask_for_mnemonic() -> Result<String> {
     print!("Enter mnemonic: ");
     stdout().flush()?;
@@ -50,6 +65,13 @@ fn ask_for_mnemonic() -> Result<String> {
     Ok(mnemonic.trim().to_string())
 }
 
+/// Encrypt the mnemonic with the password given by the user and save it in a file
+/// 
+/// ## Arguments
+/// * `path` - The path to the file where the mnemonic will be saved
+/// 
+/// ## Returns
+/// The encrypted mnemonic as a vector of base58 encoded bytes
 fn save_mnemonic(path: PathBuf) -> Result<Vec<u8>> {
     let mnemonic = ask_for_mnemonic().context("Could not read the mnemonic from stdin")?;
     let password = get_password().context("Could not read the password from stdin")?;
@@ -63,6 +85,10 @@ fn save_mnemonic(path: PathBuf) -> Result<Vec<u8>> {
     Ok(data)
 }
 
+/// Get the path to the configuration directory
+/// 
+/// ## Returns
+/// The path to the configuration directory
 pub fn get_path_to_directory() -> PathBuf {
     if let Some(proj_dirs) = ProjectDirs::from("com", "azerpas", "dca-onchain") {
         let path: &Path = proj_dirs.config_dir();
@@ -71,6 +97,6 @@ pub fn get_path_to_directory() -> PathBuf {
         }
         path.to_path_buf()
     } else {
-        panic!("Could not retrieve the configuration path. Please contact an administrator.");
+        panic!("Could not retrieve the configuration path. Please raise an issue on GitHub with your configuration");
     }
 }
