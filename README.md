@@ -11,18 +11,30 @@ Use CRON to run this script at regular intervals.
 👛 Encrypt your mnemonic using [ChaCha20Poly1305](https://docs.rs/orion/latest/orion/aead/index.html)
 
 ## Installation
-💭 A later Installation guide for non-rust users will be added when the CI/CD pipeline is set up
+### Use the executable
+Download the last version from [*Releases*](https://github.com/azerpas/dca-ethereum-onchain/releases)
+- MacOS: `darwin`
+- Linux: `linux`
+- Windows: `.exe`
 
-For now, you can clone the repo and run the script using cargo
+On MacOS, make sure to make the file executable:
+```
+chmod +x dca-onchain-darwin
+```
+
+Then refer to [Usage](#Usage)
+
+### Build from source
+You can also clone the repo and run the script using cargo
 ```sh
 git clone git@github.com:azerpas/dca-ethereum-onchain.git
 cd dca-ethereum-onchain
 cargo run -- -h
 ```
 
-[Example of running the script](#example)
-
 ## Usage
+- [Example of running the script on Goerli](#example)
+- [Example of running the script on Ethereum Mainnet](#swap-25-usdt-for-some-weth-on-mainnet)
 ```
 Usage: dca-onchain [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
 
@@ -48,9 +60,12 @@ Options:
 ```
 
 ### Example
-Swap 1 UNI for some WETH on Goerli
+#### Swap 1 UNI for some WETH on Goerli
+`\` (aka command splitting doesn't work on Windows, don't use them)
 ```sh
-cargo run -- -u "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" -n 5 -d true -a 1 -s 1 -i "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" -o "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" 
+cargo run -- --rpc "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" \ 
+  --chain-id 5 --fetch-decimals true --amount-to-approve 1 --amount-to-swap 1 \
+  --token-in "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" --token-out "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" 
 ```
 - `-u` is the RPC endpoint to connect to. You can get an API key from an RPC provider like [Alchemy](https://www.alchemy.com/)
 - `-n` is the chain ID of the network to connect to. 5 is for Goerli
@@ -59,3 +74,10 @@ cargo run -- -u "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" -n 5 -d tru
 - `-s` is the amount of tokens to swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
 - `-i` is the address of the token to swap from. This is the token you want to sell. It must be a valid ERC20 token address, here it's UNI on Goerli
 - `-o` is the address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address, here it's WETH on Goerli 
+
+#### Swap 25 USDT for some WETH on Mainnet
+```sh
+dca-onchain -u "https://mainnet.infura.io/v3/" \ 
+  -n 1 -d true -a 25 -s 25 \
+  -i "0xdAC17F958D2ee523a2206206994597C13D831ec7" -o "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" 
+```
