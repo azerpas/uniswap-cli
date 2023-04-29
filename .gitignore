@@ -1,3 +1,4 @@
 /target
 mnemonic.enc
 .env
+.DS_Store
