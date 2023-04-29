@@ -54,3 +54,4 @@ jobs:
           files: |
             target/release/dca-onchain
             target/release/dca-onchain.exe
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
