@@ -1,10 +1,11 @@
-# Script to DCA on Ethereum (on-chain)
+# Uniswap V3 Command Line Interface
+![Log screenshot of CLI](./swap.png)
 
-DCA (Dollar Cost Averaging) is an investment strategy where you buy a fixed amount of a certain asset at regular intervals, regardless of the price. This way you can avoid buying at the top of a bull run and you can take advantage of the dips.
+A command line interface to swap tokens using Uniswap V3 Quoter, [`ethers-rs`](https://docs.rs/ethers/latest/ethers/) and wallet encryption.
 
-This script allows you to DCA on Ethereum (on-chain) by swapping a fixed amount of a certain token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script.
+This script allows you swap a fixed amount of a certain token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script.
 
-Use CRON to run this script at regular intervals.
+This script was originally made to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
 
 ## Features
 📈 Quote the swap price using [Uniswap V3 Quoter](https://docs.uniswap.org/contracts/v3/reference/periphery/lens/Quoter)   
@@ -19,7 +20,7 @@ Download the last version from [*Releases*](https://github.com/azerpas/dca-ether
 
 On MacOS, make sure to make the file executable:
 ```
-chmod +x dca-onchain-darwin
+chmod +x uniswap-cli-darwin
 ```
 
 Then refer to [Usage](#Usage)
@@ -27,8 +28,8 @@ Then refer to [Usage](#Usage)
 ### Build from source
 You can also clone the repo and run the script using cargo
 ```sh
-git clone git@github.com:azerpas/dca-ethereum-onchain.git
-cd dca-ethereum-onchain
+git clone git@github.com:azerpas/uniswap-cli.git
+cd uniswap-cli
 cargo run -- -h
 ```
 
@@ -36,7 +37,7 @@ cargo run -- -h
 - [Example of running the script on Goerli](#example)
 - [Example of running the script on Ethereum Mainnet](#swap-25-usdt-for-some-weth-on-mainnet)
 ```
-Usage: dca-onchain [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
+Usage: uniswap-cli [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
 
 Options:
   -u, --rpc <RPC>
@@ -53,6 +54,8 @@ Options:
           Address of the token to swap from. This is the token you want to sell. It must be a valid ERC20 token address (e.g USDT: 0xdAC17F958D2ee523a2206206994597C13D831ec7)
   -o, --token-out <TOKEN_OUT>
           Address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address (e.g WETH: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2)
+  -v, --verbose
+          Verbose mode, will print more information about the swap If not specified, it will only print the transaction hash
   -h, --help
           Print help
   -V, --version
@@ -77,7 +80,7 @@ cargo run -- --rpc "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" \
 
 #### Swap 25 USDT for some WETH on Mainnet
 ```sh
-dca-onchain -u "https://mainnet.infura.io/v3/" \ 
+uniswap-cli -u "https://mainnet.infura.io/v3/" \ 
   -n 1 -d true -a 25 -s 25 \
   -i "0xdAC17F958D2ee523a2206206994597C13D831ec7" -o "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" 
 ```
