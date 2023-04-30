@@ -42,4 +42,9 @@ pub struct Args {
     /// It must be a valid ERC20 token address (e.g WETH: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2)
     #[arg(short = 'o', long)]
     pub token_out: String,
+
+    /// Verbose mode, will print more information about the swap
+    /// If not specified, it will only print the transaction hash
+    #[arg(short = 'v', long)]
+    pub verbose: bool,
 }

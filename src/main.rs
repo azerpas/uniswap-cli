@@ -1,12 +1,14 @@
 pub mod cli;
 pub mod crypto;
 pub mod wallet;
+pub mod explorer;
 use crate::{cli::Args, wallet::decrypt_wallet_data};
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use ethers::{prelude::*, providers::Provider, signers::Signer};
 use std::sync::Arc;
+use explorer::get_network_explorers;
 
 enum FeeAmount {
     LOWEST = 100,
@@ -34,6 +36,11 @@ async fn main() -> Result<()> {
     let quoter_address: Address = UNISWAP_V3_QUOTER_ADDRESS.parse()?;
     let token_in_address: Address = args.token_in.parse()?;
     let token_out_address: Address = args.token_out.parse()?;
+    let network_explorers_map = get_network_explorers();
+    let explorer = network_explorers_map.get(&(args.chain_id as u32)).or_else(|| {
+        println!("No explorer found for chain id {}", args.chain_id);
+        None
+    });
 
     abigen!(UniswapV3Router, "./ISwapRouter.json");
     abigen!(
@@ -55,6 +62,8 @@ async fn main() -> Result<()> {
     let quoter_contract = UniswapV3Quoter::new(quoter_address, client.clone());
     let token_in_contract = ERC20::new(token_in_address, client.clone());
 
+    println!("💫 Welcome to the Uniswap V3 Swap CLI 💫\n We will use wallet with address: {}", wallet.address());
+
     // `decimals` is used to convert the amounts to the correct unit
     // by default it is set to 0, so the user can specify amounts in the token's smallest unit
     // e.g. for USDT this is 10^6, so the user can specify amounts in USDT's smallest unit (1e-6 USDT)
@@ -62,7 +71,7 @@ async fn main() -> Result<()> {
     let mut decimals: u8 = 0;
     if args.fetch_decimals.is_some() {
         decimals = token_in_contract.decimals().call().await?;
-        println!("Decimals: {}", decimals);
+        println!("Converting to {} decimals", decimals);
     }
 
     // Convert the amount to approve to the correct unit, based on the token's decimals
@@ -77,8 +86,14 @@ async fn main() -> Result<()> {
         let amount_to_approve: U256;
 
         if args.amount_to_approve.unwrap() == 0 {
+            if args.verbose {
+                println!("Amount to approve not specified. Approving {} tokens.", args.amount_to_swap);
+            }
             amount_to_approve = amount_to_swap.clone();
         } else {
+            if args.verbose {
+                println!("Amount to approve specified. Approving {} tokens.", args.amount_to_approve.unwrap());
+            }
             amount_to_approve =
                 U256::from(args.amount_to_approve.unwrap() * 10u128.pow(decimals.into()));
         }
@@ -93,14 +108,20 @@ async fn main() -> Result<()> {
 
         println!(
             "Approved Uniswap V3 Router spending. Transaction Hash: {:?}",
-            approve_tx
+            approve_tx.transaction_hash
         );
+        if args.verbose {
+            println!("Transaction Receipt: {:#?}", approve_tx);
+        }
     } else {
         println!("Amount to approve not specified. Checking if allowance is sufficient.");
         let allowance: U256 = token_in_contract
             .allowance(wallet.address(), router_address)
             .call()
             .await?;
+        if args.verbose {
+            println!("Allowance is sufficient. Allowance: {}", allowance);
+        }
         if allowance < amount_to_swap {
             println!("Allowance is less than amount to swap. Please use the `-a` flag to approve the router to spend '{}' tokens.", token_in_address);
             return Ok(());
@@ -125,7 +146,7 @@ async fn main() -> Result<()> {
             )
         })?;
 
-    println!("Quoted swap. Transaction Hash: {:?}", quote);
+    println!("Will swap {} for {} tokens\n", amount_to_swap, quote);
 
     let deadline = U256::from(chrono::Utc::now().timestamp() + 1200); // 20 minutes from now
 
@@ -145,7 +166,16 @@ async fn main() -> Result<()> {
         .await?
         .expect("Swap transaction failed");
 
-    println!("Swap executed. Transaction Hash: {:?}", swap_tx);
+    println!("🥳 Swap executed. Transaction Hash: {:?}", swap_tx.transaction_hash);
+    if args.verbose {
+        println!("Transaction Receipt: {:#?}", swap_tx);
+    }
+    if explorer.is_some() {
+        println!(
+            "View on explorer: {}/tx/{}",
+            explorer.unwrap(), swap_tx.transaction_hash
+        );
+    }
 
     Ok(())
 }
