@@ -23,7 +23,7 @@ enum FeeAmount {
 async fn main() -> Result<()> {
     let args = Args::parse();
 
-    let wallet = decrypt_wallet_data()?;
+    let wallet = decrypt_wallet_data(args.password)?;
 
     let provider = Provider::<Http>::try_from(args.rpc)?;
     let client = Arc::new(SignerMiddleware::new(

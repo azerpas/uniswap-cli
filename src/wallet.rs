@@ -28,7 +28,7 @@ fn get_password() -> Result<String> {
 /// 
 /// ## Returns
 /// The Wallet ready to be used by ethers-rs
-pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
+pub fn decrypt_wallet_data(password: Option<String>) -> Result<Wallet<SigningKey>> {
     let mut path = get_path_to_directory();
     path = path.join("mnemonic.enc");
     let encrypted_data = match std::fs::read(path.clone()) {
@@ -38,7 +38,10 @@ pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
             Err(e) => return Err(e),
         },
     };
-    let password = get_password()?;
+    let password: String = match password {
+        Some(password) => password,
+        None => get_password()?,
+    };
     let decrypted = decrypt(bs58::decode(&encrypted_data).into_vec().unwrap(), password)?;
     let ph = std::str::from_utf8(&decrypted).unwrap();
     let index = 0u32;
