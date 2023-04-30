@@ -57,6 +57,8 @@ Options:
           Address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address (e.g WETH: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2)
   -v, --verbose
           Verbose mode, will print more information about the swap If not specified, it will only print the transaction hash
+  -w, --webhook <WEBHOOK>
+          Discord webhook URL to send the transaction hash to
   -h, --help
           Print help
   -V, --version
