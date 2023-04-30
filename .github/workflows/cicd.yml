@@ -49,18 +49,20 @@ jobs:
 
       - name: Rename Mac Release
         if: matrix.os == 'macos-latest'
-        run: mv target/release/dca-onchain target/release/dca-onchain-darwin
+        run: |
+          chmod -x target/release/uniswap-cli
+          mv target/release/uniswap-cli target/release/uniswap-cli-darwin
 
       - name: Build Linux Release
         if: matrix.os == 'ubuntu-latest'
-        run: mv target/release/dca-onchain target/release/dca-onchain-linux
+        run: mv target/release/uniswap-cli target/release/uniswap-cli-linux
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            target/release/dca-onchain-linux
-            target/release/dca-onchain-darwin
-            target/release/dca-onchain.exe
+            target/release/uniswap-cli-linux
+            target/release/uniswap-cli-darwin
+            target/release/uniswap-cli.exe
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
