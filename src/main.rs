@@ -2,7 +2,9 @@ pub mod cli;
 pub mod crypto;
 pub mod wallet;
 pub mod explorer;
-use crate::{cli::Args, wallet::decrypt_wallet_data};
+pub mod discord;
+pub mod utils;
+use crate::{cli::Args, wallet::decrypt_wallet_data, discord::WebhookMessage};
 
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -177,5 +179,38 @@ async fn main() -> Result<()> {
         );
     }
 
+    if args.webhook.is_some() {
+        if args.verbose {
+            println!("Sending webhook to {}", args.webhook.clone().unwrap());
+            println!("Getting token_out decimals to convert amount_out to correct unit");
+        }
+        let token_out_contract = ERC20::new(token_out_address, client.clone());
+        let token_out_decimals: u8 = token_out_contract.decimals().call().await?;
+
+        let token_in_fmt = utils::format_token_amount(
+            amount_to_swap.as_u64(),
+            decimals.into(),
+            5
+        );
+
+        let token_out_fmt = utils::format_token_amount(
+            quote.as_u64(),
+            token_out_decimals.into(),
+            5
+        );
+
+        let message = format!(
+            "You swapped {} tokens for {} tokens",
+            token_in_fmt, token_out_fmt
+        );
+
+        match discord::send_message(
+            &args.webhook.unwrap(), 
+            &WebhookMessage { content: message }
+        ).await {
+            Ok(_) => println!("Webhook sent successfully"),
+            Err(e) => println!("Failed to send webhook: {}", e)
+        }
+    }
     Ok(())
 }

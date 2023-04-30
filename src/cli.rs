@@ -47,4 +47,8 @@ pub struct Args {
     /// If not specified, it will only print the transaction hash
     #[arg(short = 'v', long)]
     pub verbose: bool,
+
+    /// Discord webhook URL to send the transaction hash to
+    #[arg(short = 'w', long)]
+    pub webhook: Option<String>,
 }
