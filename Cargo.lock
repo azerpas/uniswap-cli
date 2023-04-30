@@ -800,27 +800,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dca-onchain"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bs58",
- "chrono",
- "clap 4.2.4",
- "directories",
- "ethers",
- "getrandom",
- "orion",
- "rpassword",
- "rustc-hex",
- "serde",
- "serde_json",
- "tiny-keccak",
- "tokio",
- "web3",
-]
-
-[[package]]
 name = "der"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3965,6 +3944,27 @@ name = "unicode-xid"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
+
+[[package]]
+name = "uniswap-cli"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "bs58",
+ "chrono",
+ "clap 4.2.4",
+ "directories",
+ "ethers",
+ "getrandom",
+ "orion",
+ "rpassword",
+ "rustc-hex",
+ "serde",
+ "serde_json",
+ "tiny-keccak",
+ "tokio",
+ "web3",
+]
 
 [[package]]
 name = "untrusted"
