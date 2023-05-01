@@ -3,13 +3,13 @@
 
 A command line interface to swap tokens using Uniswap V3 Quoter and Router, [`ethers-rs`](https://docs.rs/ethers/latest/ethers/) and wallet encryption.
 
-This script allows you swap a fixed amount of a certain token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the `-p` flag.
+This script allows you swap a fixed amount of a given token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the `-p` flag.
 
-This script was originally made to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
+This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
 
 ## Features
 📈 Quote the swap price using [Uniswap V3 Quoter](https://docs.uniswap.org/contracts/v3/reference/periphery/lens/Quoter)  
-↔️ Swap tokens using [Uniswap V3 Router](https://docs.uniswap.org/contracts/v3/reference/overview#swaprouter) 
+↔️ Swap tokens using [Uniswap V3 Router](https://docs.uniswap.org/contracts/v3/reference/overview#swaprouter)    
 👛 Encrypt your mnemonic using [ChaCha20Poly1305](https://docs.rs/orion/latest/orion/aead/index.html)
 
 ## Installation
