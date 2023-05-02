@@ -20,9 +20,12 @@ Download the last version from [*Releases*](https://github.com/azerpas/dca-ether
 - Windows: `.exe`
 
 On MacOS, make sure to make the file executable:
-```
+```sh
 chmod +x uniswap-cli-darwin
+# if it still says `Permission denied`, try
+chown 777 uniswap-cli-darwin
 ```
+If you then get a `"uniswap-cli-darwin" cannot be opened because the developer cannot be verified` error, go to `System Preferences > Security & Privacy > General` and click `Open Anyway`
 
 Then refer to [Usage](#Usage)
 
