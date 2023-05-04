@@ -40,6 +40,7 @@ cargo run -- -h
 ## Usage
 - [Example of running the script on Goerli](#example)
 - [Example of running the script on Ethereum Mainnet](#swap-25-usdt-for-some-weth-on-mainnet)
+- [Example of swapping 5 USDT for WETHs on Optimism network with pre-approval spending](#swap-5-usdt-for-some-weth-on-optimism-network-with-pre-approval-spending)
 ```
 Usage: uniswap-cli [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
 
@@ -78,17 +79,25 @@ cargo run -- --rpc "https://eth-goerli.g.alchemy.com/v2/{YOUR_API_KEY}" \
   --chain-id 5 --fetch-decimals true --amount-to-approve 1 --amount-to-swap 1 \
   --token-in "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" --token-out "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" 
 ```
-- `-u` is the RPC endpoint to connect to. You can get an API key from an RPC provider like [Alchemy](https://www.alchemy.com/)
-- `-n` is the chain ID of the network to connect to. 5 is for Goerli
-- `-d` is used to fetch the decimals of the token you want to swap from. If used, the given `amount_to_swap` and `amount_to_approve` will be multiplied by 10^`decimals` to get the correct amount. `decimals` are fetched from the token contract. For example, if you want to swap 0.5 USDT, you need to specify 500000 (USDT having 6 decimals) without the `-d` flag. With the `-d` flag, you can specify 0.5 and the script will fetch the decimals from the USDT contract and multiply 0.5 by 10^6 to get the correct amount.
-- `-a` is the amount of tokens to approve for the swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
-- `-s` is the amount of tokens to swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
-- `-i` is the address of the token to swap from. This is the token you want to sell. It must be a valid ERC20 token address, here it's UNI on Goerli
-- `-o` is the address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address, here it's WETH on Goerli 
+- `-u` (`--rpc`) is the RPC endpoint to connect to. You can get an API key from an RPC provider like [Alchemy](https://www.alchemy.com/)
+- `-n` (`--chain-id`) is the chain ID of the network to connect to. 5 is for Goerli
+- `-d` (`--fetch-decimals`) is used to fetch the decimals of the token you want to swap from. If used, the given `amount_to_swap` and `amount_to_approve` will be multiplied by 10^`decimals` to get the correct amount. `decimals` are fetched from the token contract. For example, if you want to swap 0.5 USDT, you need to specify 500000 (USDT having 6 decimals) without the `-d` flag. With the `-d` flag, you can specify 0.5 and the script will fetch the decimals from the USDT contract and multiply 0.5 by 10^6 to get the correct amount.
+- `-a` (`--amount-to-approve`) is the amount of tokens to approve for the swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
+- `-s` (`--amount-to-swap`) is the amount of tokens to swap. Make sure to use the correct decimals as specified above or use the `-d` flag.
+- `-i` (`--token-in`) is the address of the token to swap from. This is the token you want to sell. It must be a valid ERC20 token address, here it's UNI on Goerli
+- `-o` (`--token-out`) is the address of the token to swap to. This is the token you want to buy. It must be a valid ERC20 token address, here it's WETH on Goerli 
 
 #### Swap 25 USDT for some WETH on Mainnet
 ```sh
 uniswap-cli -u "https://mainnet.infura.io/v3/" \ 
   -n 1 -d true -a 25 -s 25 \
   -i "0xdAC17F958D2ee523a2206206994597C13D831ec7" -o "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" 
+```
+
+#### Swap 5 USDT for some WETH on Optimism network with pre-approval spending
+You have already approved the contract to spend your USDT tokens? You can skip the approval step by ommiting the `-a` flag and save some gas.
+```sh
+./uniswap-cli-darwin -u https://opt-mainnet.g.alchemy.com/v2/{YOUR_API_KEY} -n 10 \
+ -d true -s 5 \
+ -i "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58" -o "0x4200000000000000000000000000000000000006"
 ```
