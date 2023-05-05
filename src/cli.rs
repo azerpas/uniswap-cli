@@ -51,8 +51,4 @@ pub struct Args {
     /// Discord webhook URL to send the transaction hash to
     #[arg(short = 'w', long)]
     pub webhook: Option<String>,
-
-    /// Password to unlock the wallet
-    #[arg(short = 'p', long)]
-    pub password: Option<String>,
 }
