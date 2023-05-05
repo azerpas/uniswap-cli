@@ -1,5 +1,6 @@
 # Uniswap V3 Command Line Interface
 ![Log screenshot of CLI](./swap.png)
+![Webhook screenshot](./webhook.jpg)
 
 A command line interface to swap tokens using Uniswap V3 Quoter and Router, [`ethers-rs`](https://docs.rs/ethers/latest/ethers/) and wallet encryption.
 
