@@ -4,6 +4,7 @@ pub mod wallet;
 pub mod explorer;
 pub mod discord;
 pub mod utils;
+pub mod settings;
 use crate::{cli::Args, wallet::decrypt_wallet_data, discord::WebhookMessage};
 
 use anyhow::{Context, Result};
@@ -23,7 +24,7 @@ enum FeeAmount {
 async fn main() -> Result<()> {
     let args = Args::parse();
 
-    let wallet = decrypt_wallet_data(args.password)?;
+    let wallet = decrypt_wallet_data()?;
 
     let provider = Provider::<Http>::try_from(args.rpc)?;
     let client = Arc::new(SignerMiddleware::new(
@@ -174,7 +175,7 @@ async fn main() -> Result<()> {
     }
     if explorer.is_some() {
         println!(
-            "View on explorer: {}/tx/{}",
+            "View on explorer: {:?}/tx/{:?}",
             explorer.unwrap(), swap_tx.transaction_hash
         );
     }
