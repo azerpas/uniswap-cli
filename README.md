@@ -3,7 +3,7 @@
 
 A command line interface to swap tokens using Uniswap V3 Quoter and Router, [`ethers-rs`](https://docs.rs/ethers/latest/ethers/) and wallet encryption.
 
-This script allows you swap a fixed amount of a given token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the `-p` flag.
+This script allows you swap a fixed amount of a given token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the [settings file to save your password](#save-password).
 
 This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
 
@@ -63,8 +63,6 @@ Options:
           Verbose mode, will print more information about the swap If not specified, it will only print the transaction hash
   -w, --webhook <WEBHOOK>
           Discord webhook URL to send the transaction hash to
-  -p, --password <PASSWORD>
-          Password to unlock the wallet
   -h, --help
           Print help
   -V, --version
@@ -101,3 +99,26 @@ You have already approved the contract to spend your USDT tokens? You can skip t
  -d true -s 5 \
  -i "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58" -o "0x4200000000000000000000000000000000000006"
 ```
+
+### Discord webhook
+You can specify a Discord webhook URL with the `-w` (`--webhook`) flag to send the transaction hash to. This is useful if you want to get notified when the transaction is done. You can create a webhook in your Discord server settings. [Here's a guide](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) on how to create a webhook.
+
+### Save password
+⚠️ **This is not recommended as anyone with access to your home directory will be able to read the password, thus getting access to your wallet.** ⚠️
+Instead of typing your password each time you run the script, you can modify located at `~/.uniswap-cli/settings.json` and add your password there. The file should look like this:
+```json
+{
+  "webhook": null,
+  "password": "your_password"
+}
+```
+Useful if you want to run the script in a cron job for example.
+
+If you choose to save your password in this file, my recommendations are:
+- Use a different password than your others wallets passwords
+- Make sure the permissions of the file are set for your user only
+- Only use this feature if you're running the script on a trusted machine
+- Only send an amount of tokens you're willing to lose, and do not use the seed phrase of your main wallet. Create a new wallet with a small amount of tokens and use this wallet's seed phrase to run the script.
+
+## Disclaimer
+This script is provided as is, without any warranty. I am not responsible for any loss of funds. Use at your own risk.
