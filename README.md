@@ -6,7 +6,7 @@ A command line interface to swap tokens using Uniswap V3 Quoter and Router, [`et
 
 This script allows you swap a fixed amount of a given token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the [settings file to save your password](#save-password).
 
-This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
+This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). [You can CRON it to run every week.](dca-dollar-cost-averaging-investing)
 
 ## Table of Contents
 - [Features](#features)
