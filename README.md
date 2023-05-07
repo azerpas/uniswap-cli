@@ -8,6 +8,13 @@ This script allows you swap a fixed amount of a given token for another token. I
 
 This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). You can CRON it to run every week.
 
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+  - [Use the executable](#use-the-executable)
+  - [Build from source](#build-from-source)
+- [Usage](#usage)
+
 ## Features
 📈 Quote the swap price using [Uniswap V3 Quoter](https://docs.uniswap.org/contracts/v3/reference/periphery/lens/Quoter)  
 ↔️ Swap tokens using [Uniswap V3 Router](https://docs.uniswap.org/contracts/v3/reference/overview#swaprouter)    
@@ -28,7 +35,7 @@ chown 777 uniswap-cli-darwin
 ```
 If you then get a `"uniswap-cli-darwin" cannot be opened because the developer cannot be verified` error, go to `System Preferences > Security & Privacy > General` and click `Open Anyway`
 
-Then refer to [Usage](#Usage)
+Then refer to [Usage](#usage)
 
 ### Build from source
 You can also clone the repo and run the script using cargo
@@ -121,5 +128,58 @@ If you choose to save your password in this file, my recommendations are:
 - Only use this feature if you're running the script on a trusted machine
 - Only send an amount of tokens you're willing to lose, and do not use the seed phrase of your main wallet. Create a new wallet with a small amount of tokens and use this wallet's seed phrase to run the script.
 
+### DCA (Dollar Cost Averaging) investing
+You can use this script to do DCA investing. For example, if you want to buy 100 USDT worth of WETH every week, you can create a cron job that runs the script every week with the following parameters:
+```sh
+uniswap-cli -u "https://mainnet.infura.io/v3/" \ 
+  -n 1 -d true -a 100 -s 100 \
+  -i "0xdAC17F958D2ee523a2206206994597C13D831ec7" -o "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+```
+#### With MacOS
+You can use the `launchd` daemon to run the script every week. Create a file named `com.uniswap-cli.plist` in `~/Library/LaunchAgents/` with the following content:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.azerpas.uniswap-cli</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/YOUR_USER/uniswap-launchd.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>1</integer> <!-- Run the script every Monday -->
+        <key>Hour</key>
+        <integer>20</integer> <!-- Run the script at 08:00 PM -->
+        <key>Minute</key>
+        <integer>00</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/> <!-- Run the script when the agent is loaded, i.e., when the system starts -->
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USER/uniswap-launchd-cli-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USER/uniswap-launchd-cli-stderr.log</string>
+</dict>
+</plist>
+```
+Then copy the `uniswap-launchd.sh` script in your home directory and make it executable.
+```sh
+chmod +x uniswap-launchd.sh
+chown 777 uniswap-launchd.sh
+```
+Finally, load the agent with the following command:
+```sh
+launchctl load ~/Library/LaunchAgents/com.uniswap-cli.plist
+```
+The script will now run every week at 08:00 PM on Monday. You can check the logs in `~/uniswap-launchd-cli-stdout.log` and `~/uniswap-launchd-cli-stderr.log`.
+#### With Linux
+TODO
+#### With Windows
+TODO
+
 ## Disclaimer
-This script is provided as is, without any warranty. I am not responsible for any loss of funds. Use at your own risk.
+This script is provided as is, without any warranty. I am not responsible for any loss of funds. Use at your own risk. I am not affiliated with Uniswap or any other project mentioned in this repository. This is not financial advice.
