@@ -1,17 +1,17 @@
 pub mod cli;
 pub mod crypto;
-pub mod wallet;
-pub mod explorer;
 pub mod discord;
-pub mod utils;
+pub mod explorer;
 pub mod settings;
-use crate::{cli::Args, wallet::decrypt_wallet_data, discord::WebhookMessage};
+pub mod utils;
+pub mod wallet;
+use crate::{cli::Args, discord::WebhookMessage, wallet::decrypt_wallet_data};
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use ethers::{prelude::*, providers::Provider, signers::Signer};
-use std::sync::Arc;
 use explorer::get_network_explorers;
+use std::sync::Arc;
 
 enum FeeAmount {
     LOWEST = 100,
@@ -40,10 +40,12 @@ async fn main() -> Result<()> {
     let token_in_address: Address = args.token_in.parse()?;
     let token_out_address: Address = args.token_out.parse()?;
     let network_explorers_map = get_network_explorers();
-    let explorer = network_explorers_map.get(&(args.chain_id as u32)).or_else(|| {
-        println!("No explorer found for chain id {}", args.chain_id);
-        None
-    });
+    let explorer = network_explorers_map
+        .get(&(args.chain_id as u32))
+        .or_else(|| {
+            println!("No explorer found for chain id {}", args.chain_id);
+            None
+        });
 
     abigen!(UniswapV3Router, "./ISwapRouter.json");
     abigen!(
@@ -58,6 +60,7 @@ async fn main() -> Result<()> {
             approve(address spender, uint256 amount)(bool)
             decimals()(uint8)
             allowance(address owner, address spender)(uint256)
+            symbol()(string)
         ]"#r
     );
 
@@ -65,7 +68,10 @@ async fn main() -> Result<()> {
     let quoter_contract = UniswapV3Quoter::new(quoter_address, client.clone());
     let token_in_contract = ERC20::new(token_in_address, client.clone());
 
-    println!("💫 Welcome to the Uniswap V3 Swap CLI 💫\n We will use wallet with address: {}", wallet.address());
+    println!(
+        "💫 Welcome to the Uniswap V3 Swap CLI 💫\n We will use wallet with address: {}",
+        wallet.address()
+    );
 
     // `decimals` is used to convert the amounts to the correct unit
     // by default it is set to 0, so the user can specify amounts in the token's smallest unit
@@ -90,12 +96,18 @@ async fn main() -> Result<()> {
 
         if args.amount_to_approve.unwrap() == 0 {
             if args.verbose {
-                println!("Amount to approve not specified. Approving {} tokens.", args.amount_to_swap);
+                println!(
+                    "Amount to approve not specified. Approving {} tokens.",
+                    args.amount_to_swap
+                );
             }
             amount_to_approve = amount_to_swap.clone();
         } else {
             if args.verbose {
-                println!("Amount to approve specified. Approving {} tokens.", args.amount_to_approve.unwrap());
+                println!(
+                    "Amount to approve specified. Approving {} tokens.",
+                    args.amount_to_approve.unwrap()
+                );
             }
             amount_to_approve =
                 U256::from(args.amount_to_approve.unwrap() * 10u128.pow(decimals.into()));
@@ -169,14 +181,18 @@ async fn main() -> Result<()> {
         .await?
         .expect("Swap transaction failed");
 
-    println!("🥳 Swap executed. Transaction Hash: {:?}", swap_tx.transaction_hash);
+    println!(
+        "🥳 Swap executed. Transaction Hash: {:?}",
+        swap_tx.transaction_hash
+    );
     if args.verbose {
         println!("Transaction Receipt: {:#?}", swap_tx);
     }
     if explorer.is_some() {
         println!(
             "View on explorer: {}/tx/{:?}",
-            explorer.unwrap(), swap_tx.transaction_hash
+            explorer.unwrap(),
+            swap_tx.transaction_hash
         );
     }
 
@@ -188,30 +204,92 @@ async fn main() -> Result<()> {
         let token_out_contract = ERC20::new(token_out_address, client.clone());
         let token_out_decimals: u8 = token_out_contract.decimals().call().await?;
 
-        let token_in_fmt = utils::format_token_amount(
-            amount_to_swap.as_u64(),
-            decimals.into(),
-            5
-        );
+        let token_in_fmt = utils::format_token_amount(amount_to_swap.as_u64(), decimals.into(), 5);
 
-        let token_out_fmt = utils::format_token_amount(
-            quote.as_u64(),
-            token_out_decimals.into(),
-            5
-        );
+        let token_out_fmt =
+            utils::format_token_amount(quote.as_u64(), token_out_decimals.into(), 5);
+
+        let token_in_symbol = match token_in_contract.symbol().call().await {
+            Ok(s) => s,
+            Err(_) => {
+                println!("Failed to get token_in symbol");
+                "tokens".to_string()
+            }
+        };
+
+        let token_out_symbol = match token_out_contract.symbol().call().await {
+            Ok(s) => s,
+            Err(_) => {
+                println!("Failed to get token_out symbol");
+                "tokens".to_string()
+            }
+        };
 
         let message = format!(
-            "You swapped {} tokens for {} tokens",
-            token_in_fmt, token_out_fmt
+            "You swapped {} {} for {} {}",
+            token_in_fmt, token_in_symbol, token_out_fmt, token_out_symbol
         );
 
-        match discord::send_message(
-            &args.webhook.unwrap(), 
-            &WebhookMessage { content: message }
-        ).await {
+        match discord::send_message(&args.webhook.unwrap(), &WebhookMessage { content: message })
+            .await
+        {
             Ok(_) => println!("Webhook sent successfully"),
-            Err(e) => println!("Failed to send webhook: {}", e)
+            Err(e) => println!("Failed to send webhook: {}", e),
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use dotenv::dotenv;
+    use ethers::{
+        abi::Address,
+        prelude::{abigen, rand::thread_rng, SignerMiddleware},
+        providers::{Http, Provider},
+        signers::{Signer, Wallet},
+    };
+    use std::env;
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn can_get_erc20_symbol() -> anyhow::Result<()> {
+        abigen!(
+            ERC20,
+            r#"[
+                symbol()(string)
+            ]"#r
+        );
+
+        dotenv().ok();
+        let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
+
+        let provider = Provider::<Http>::try_from(rpc_url).unwrap();
+        let wallet = Wallet::new(&mut thread_rng());
+        let client = Arc::new(SignerMiddleware::new(
+            provider,
+            wallet.clone().with_chain_id(1u32),
+        ));
+
+        let usdt_contract = ERC20::new(
+            "0xdAC17F958D2ee523a2206206994597C13D831ec7".parse::<Address>()?,
+            client.clone(),
+        );
+        let usdc_contract = ERC20::new(
+            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48".parse::<Address>()?,
+            client.clone(),
+        );
+        let steth_contract = ERC20::new(
+            "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84".parse::<Address>()?,
+            client.clone(),
+        );
+
+        let usdt_symbol = usdt_contract.symbol().call().await?;
+        let usdc_symbol = usdc_contract.symbol().call().await?;
+        let steth_symbol = steth_contract.symbol().call().await?;
+        assert_eq!(usdt_symbol, "USDT");
+        assert_eq!(usdc_symbol, "USDC");
+        assert_eq!(steth_symbol, "stETH");
+        Ok(())
+    }
 }

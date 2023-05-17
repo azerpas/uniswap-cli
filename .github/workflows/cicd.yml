@@ -21,6 +21,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      RPC_URL: ${{ secrets.RPC_URL }}
 
     steps:
       - uses: actions/checkout@v3
