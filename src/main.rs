@@ -175,7 +175,7 @@ async fn main() -> Result<()> {
     }
     if explorer.is_some() {
         println!(
-            "View on explorer: {:?}/tx/{:?}",
+            "View on explorer: {}/tx/{:?}",
             explorer.unwrap(), swap_tx.transaction_hash
         );
     }
