@@ -1,12 +1,14 @@
 # Uniswap V3 Command Line Interface
 ![Log screenshot of CLI](./swap.png)
-![Webhook screenshot](./webhook.jpg)
+![Etherscan screenshot](./etherscan.png)
 
 A command line interface to swap tokens using Uniswap V3 Quoter and Router, [`ethers-rs`](https://docs.rs/ethers/latest/ethers/) and wallet encryption.
 
 This script allows you swap a fixed amount of a given token for another token. It uses ChaCha20Poly1305 encryption to encrypt your mnemonic/seed phrase and store it in a file. The wallet is then used to sign the transactions. It will ask you for a password to encrypt your mnemonic once and to unlock your wallet every time you run the script if you don't use the [settings file to save your password](#save-password).
 
 This script was originally created to swap a fixed amount of USDT for WETH every week as a dollar cost averaging strategy (DCA). [You can CRON it to run every week.](#dca-dollar-cost-averaging-investing)
+
+![Webhook screenshot](./webhook.jpg)
 
 ## Table of Contents
 - [Features](#features)
