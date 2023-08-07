@@ -48,9 +48,11 @@ cargo run -- -h
 ```
 
 ## Usage
-- [Example of running the script on Goerli](#example)
-- [Example of running the script on Ethereum Mainnet](#swap-25-usdt-for-some-weth-on-mainnet)
-- [Example of swapping 5 USDT for WETHs on Optimism network with pre-approval spending](#swap-5-usdt-for-some-weth-on-optimism-network-with-pre-approval-spending)
+- [Swap on Goerli](#example)
+- [Swap on Ethereum Mainnet](#swap-25-usdt-for-some-weth-on-mainnet)
+- [Swap 5 USDT for WETHs on Optimism network with pre-approval spending](#swap-5-usdt-for-some-weth-on-optimism-network-with-pre-approval-spending)
+- [Send notifications to Discord](#discord-webhook)
+- [Swap periodically - DCA (Dollar Cost Averaging) investing](#dca-dollar-cost-averaging-investing)
 ```
 Usage: uniswap-cli [OPTIONS] --amount-to-swap <AMOUNT_TO_SWAP> --token-in <TOKEN_IN> --token-out <TOKEN_OUT>
 
