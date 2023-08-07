@@ -6,6 +6,7 @@ use std::{
 
 use crate::{crypto::{decrypt, encrypt, nonce}, settings::get_password_from_settings};
 use anyhow::{Context, Result};
+use bip39::{Mnemonic, Language};
 use directories::ProjectDirs;
 use ethers::{
     prelude::{k256::ecdsa::SigningKey},
@@ -60,11 +61,16 @@ pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
 /// ## Returns
 /// The mnemonic as a string
 fn ask_for_mnemonic() -> Result<String> {
-    print!("Enter mnemonic: ");
+    print!("Enter mnemonic/seedphrase: ");
     stdout().flush()?;
 
     let mut mnemonic = String::new();
     stdin().read_line(&mut mnemonic)?;
+
+    if !is_valid_seed_phrase(&mnemonic) {
+        println!("\nInvalid seed phrase, please try again");
+        return ask_for_mnemonic();
+    }
 
     Ok(mnemonic.trim().to_string())
 }
@@ -104,3 +110,49 @@ pub fn get_path_to_directory() -> PathBuf {
         panic!("Could not retrieve the configuration path. Please raise an issue on GitHub with your configuration");
     }
 }
+
+fn is_valid_seed_phrase(seed_phrase: &str) -> bool {
+    match Mnemonic::from_phrase(seed_phrase, Language::English) {
+        Ok(_) => true,
+        Err(e) => {
+            println!("Error: {}", e);
+            false
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_12_words() {
+        let seed_phrase = "hurt artist runway obtain able enforce stable pretty pulp pulse trophy hockey";
+        assert!(is_valid_seed_phrase(seed_phrase));
+    }
+
+    #[test]
+    fn test_valid_24_words() {
+        let seed_phrase = "hotel stand hat index gallery access bicycle number minimum language review weird rough cross nurse blouse alarm shuffle razor empty educate source steak latin";
+        assert!(is_valid_seed_phrase(seed_phrase));
+    }
+
+    #[test]
+    fn test_invalid_word() {
+        let seed_phrase = "pistol maple duty lunch canyon critic lava penalty echo admit false dentistry"; // "dentistry" is not in the wordlist
+        assert!(!is_valid_seed_phrase(seed_phrase));
+    }
+
+    #[test]
+    fn test_invalid_length() {
+        let seed_phrase = "pistol maple duty lunch canyon critic lava penalty"; // Only 8 words
+        assert!(!is_valid_seed_phrase(seed_phrase));
+    }
+
+    #[test]
+    fn test_empty_phrase() {
+        let seed_phrase = "";
+        assert!(!is_valid_seed_phrase(seed_phrase));
+    }
+}
+
