@@ -61,14 +61,14 @@ pub fn decrypt_wallet_data() -> Result<Wallet<SigningKey>> {
 /// ## Returns
 /// The mnemonic as a string
 fn ask_for_mnemonic() -> Result<String> {
-    print!("Enter mnemonic: ");
+    print!("Enter mnemonic/seedphrase: ");
     stdout().flush()?;
 
     let mut mnemonic = String::new();
     stdin().read_line(&mut mnemonic)?;
 
     if !is_valid_seed_phrase(&mnemonic) {
-        println!("Invalid seed phrase, please try again");
+        println!("\nInvalid seed phrase, please try again");
         return ask_for_mnemonic();
     }
 
