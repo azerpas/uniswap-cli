@@ -77,6 +77,7 @@ fn ask_for_wallet() -> Result<String> {
 
     let mut input = String::new();
     stdin().read_line(&mut input)?;
+    input = input.trim().to_string();
 
     // Check if the input is a mnemonic
     if is_valid_seed_phrase(&input) {
@@ -88,7 +89,7 @@ fn ask_for_wallet() -> Result<String> {
     } 
     // If the input is not a mnemonic or a private key, ask again
     else {
-        println!("\nInvalid seed phrase or private key, please try again");
+        println!("\nInvalid seed phrase or private key, please try again\n");
         return ask_for_wallet();
     }
 }
@@ -184,7 +185,7 @@ mod tests {
 
     #[test]
     fn test_invalid_private_key() {
-        assert!(is_valid_private_key("invalid private key") == false);
+        assert!(!is_valid_private_key("invalid private key"));
     }
 
     #[test]
