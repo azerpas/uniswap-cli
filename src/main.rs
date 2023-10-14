@@ -114,8 +114,17 @@ async fn main() -> Result<()> {
         }
 
         // Approve the router to spend USDT
-        let approve_tx: TransactionReceipt = token_in_contract
-            .approve(router_address, amount_to_approve)
+        let approve_tx = token_in_contract
+            .approve(router_address, amount_to_approve);
+
+        let approve_tx_gas = approve_tx.estimate_gas().await?;
+
+        if args.verbose {
+            println!("Approve transaction gas estimate: {}", approve_tx_gas);
+        }
+
+        let approve_tx: TransactionReceipt = approve_tx
+            .gas(approve_tx_gas)
             .send()
             .await?
             .await?
